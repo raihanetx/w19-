@@ -1,0 +1,27 @@
+[
+  {
+    "id": "course",
+    "name": "Courses",
+    "icon": "fas fa-graduation-cap"
+  },
+  {
+    "id": "subscription",
+    "name": "Subscription",
+    "icon": "fas fa-key"
+  },
+  {
+    "id": "software",
+    "name": "Software",
+    "icon": "fas fa-laptop-code"
+  },
+  {
+    "id": "ebook",
+    "name": "Ebook",
+    "icon": "fas fa-book-open"
+  },
+  {
+    "id": "resource",
+    "name": "Resources",
+    "icon": "fas fa-tools"
+  }
+]
