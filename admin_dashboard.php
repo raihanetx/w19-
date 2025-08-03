@@ -113,6 +113,53 @@ $stats_90_days = getStatsForPeriod($all_site_orders_for_stats, $ninety_days_star
 $stats_year = getStatsForPeriod($all_site_orders_for_stats, $year_start, $today_end);
 $current_total_pending_all_time = getCurrentTotalPendingOrders($all_site_orders_for_stats);
 
+// ---------- PAGE ROUTING LOGIC ----------
+$page = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
+// ----------------------------------------
+
+// ---------- LOAD PRODUCTS (if on products page) ----------
+$products = [];
+$products_load_error = null;
+if ($page === 'products' || $page === 'edit_product') {
+    $products_file_path = __DIR__ . '/products.json';
+    if (file_exists($products_file_path)) {
+        $json_product_data = file_get_contents($products_file_path);
+        if ($json_product_data === false) {
+            $products_load_error = "Could not read products.json file.";
+        } else {
+            $decoded_products = json_decode($json_product_data, true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded_products)) {
+                $products = $decoded_products;
+            } else {
+                $products_load_error = "Critical Error: Could not decode products.json. Error: " . json_last_error_msg();
+            }
+        }
+    } else {
+        $products_load_error = "products.json file not found.";
+    }
+}
+
+// ---------- LOAD CATEGORIES ----------
+$categories = [];
+$categories_load_error = null;
+$categories_file_path = __DIR__ . '/categories.json';
+if (file_exists($categories_file_path)) {
+    $json_category_data = file_get_contents($categories_file_path);
+    if ($json_category_data === false) {
+        $categories_load_error = "Could not read categories.json file.";
+    } else {
+        $decoded_categories = json_decode($json_category_data, true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded_categories)) {
+            $categories = $decoded_categories;
+        } else {
+            $categories_load_error = "Critical Error: Could not decode categories.json. Error: " . json_last_error_msg();
+        }
+    }
+} else {
+    $categories_load_error = "categories.json file not found.";
+}
+// ---------------------------------------------------------
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -475,8 +522,9 @@ $current_total_pending_all_time = getCurrentTotalPendingOrders($all_site_orders_
             </div>
             <nav class="admin-nav">
                 <ul>
-                    <li><a href="admin_dashboard.php" class="<?php echo (strpos($_SERVER['REQUEST_URI'], 'admin_dashboard.php') !== false && empty($_GET['page']) && strpos($_SERVER['REQUEST_URI'], 'product_code_generator.html') === false) ? 'active' : ''; ?>"><i class="fas fa-chart-pie"></i> <span>Dashboard</span></a></li>
-                    <li><a href="product_code_generator.html" target="_blank"><i class="fas fa-plus-circle"></i> <span>Add Product Helper</span></a></li>
+                    <li><a href="admin_dashboard.php?page=dashboard" class="<?php echo ($page === 'dashboard') ? 'active' : ''; ?>"><i class="fas fa-chart-pie"></i> <span>Dashboard</span></a></li>
+                    <li><a href="admin_dashboard.php?page=products" class="<?php echo ($page === 'products') ? 'active' : ''; ?>"><i class="fas fa-box"></i> <span>Manage Products</span></a></li>
+                    <li><a href="admin_dashboard.php?page=categories" class="<?php echo ($page === 'categories') ? 'active' : ''; ?>"><i class="fas fa-tags"></i> <span>Manage Categories</span></a></li>
                     <li><a href="admin_dashboard.php?logout=1"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a></li>
                 </ul>
             </nav>
@@ -489,7 +537,10 @@ $current_total_pending_all_time = getCurrentTotalPendingOrders($all_site_orders_
                 </div>
                 <a href="admin_dashboard.php?logout=1" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
             </header>
+
             <div class="admin-page-content">
+
+                <?php if ($page === 'dashboard'): ?>
                 <div class="content-card">
                     <h2 class="card-title">Performance Overview</h2>
                     <div class="stats-period-selector">
@@ -520,7 +571,6 @@ $current_total_pending_all_time = getCurrentTotalPendingOrders($all_site_orders_
                         <div class="alert-message alert-danger"><?php echo htmlspecialchars($json_load_error); ?></div>
                     <?php endif; ?>
                     <?php
-                        // Display success/error messages from GET parameters
                         if (isset($_GET['status_change'])) {
                             $changed_order_id = isset($_GET['orderid']) ? htmlspecialchars($_GET['orderid']) : '';
                             if ($_GET['status_change'] == 'success') {
@@ -552,7 +602,7 @@ $current_total_pending_all_time = getCurrentTotalPendingOrders($all_site_orders_
                                 <?php if (isset($single_order['items']) && is_array($single_order['items'])): foreach ($single_order['items'] as $item):
                                     $item_name = htmlspecialchars($item['name'] ?? 'Unknown');
                                     $item_quantity = htmlspecialchars($item['quantity'] ?? 1);
-                                    $item_price = htmlspecialchars(number_format(floatval($item['price'] ?? 0), 0)); // Price without decimals for cleaner look
+                                    $item_price = htmlspecialchars(number_format(floatval($item['price'] ?? 0), 0));
                                     $item_duration = isset($item['selectedDurationLabel']) && !empty($item['selectedDurationLabel']) ? ' (' . htmlspecialchars($item['selectedDurationLabel']) . ')' : '';
                                 ?>
                                     <li><?php echo $item_name . $item_duration; ?> (x<?php echo $item_quantity; ?>)</li>
@@ -571,24 +621,14 @@ $current_total_pending_all_time = getCurrentTotalPendingOrders($all_site_orders_
                                 <td data-label='Actions'>
                                 <div class="action-buttons-group">
                                 <?php if ($order_status_val === 'pending'): ?>
-                                    <form method='POST' action='confirm_order.php' style='display:inline;'>
-                                        <input type='hidden' name='order_id_to_change' value='<?php echo htmlspecialchars($single_order['id']); ?>'>
-                                        <input type='hidden' name='new_status' value='Confirmed'><button type='submit' class='action-btn action-btn-confirm'>Confirm</button>
-                                    </form>
-                                    <form method='POST' action='confirm_order.php' style='display:inline;'>
-                                        <input type='hidden' name='order_id_to_change' value='<?php echo htmlspecialchars($single_order['id']); ?>'>
-                                        <input type='hidden' name='new_status' value='Cancelled'><button type='submit' class='action-btn action-btn-cancel'>Cancel</button>
-                                    </form>
+                                    <form method='POST' action='confirm_order.php' style='display:inline;'><input type='hidden' name='order_id_to_change' value='<?php echo htmlspecialchars($single_order['id']); ?>'><input type='hidden' name='new_status' value='Confirmed'><button type='submit' class='action-btn action-btn-confirm'>Confirm</button></form>
+                                    <form method='POST' action='confirm_order.php' style='display:inline;'><input type='hidden' name='order_id_to_change' value='<?php echo htmlspecialchars($single_order['id']); ?>'><input type='hidden' name='new_status' value='Cancelled'><button type='submit' class='action-btn action-btn-cancel'>Cancel</button></form>
                                 <?php elseif ($order_status_val === 'confirmed'): ?>
                                     <span class='action-btn-text confirmed'>Confirmed <small><?php if(isset($single_order['confirmed_at'])) echo htmlspecialchars(date('d M, H:i', strtotime($single_order['confirmed_at']))); ?></small></span>
                                 <?php elseif ($order_status_val === 'cancelled'): ?>
                                     <span class='action-btn-text cancelled'>Cancelled <small><?php if(isset($single_order['cancelled_at'])) echo htmlspecialchars(date('d M, H:i', strtotime($single_order['cancelled_at']))); ?></small></span>
                                 <?php endif; ?>
-                                <?php // Hide button is always available for processed orders if needed, or only for pending if preferred ?>
-                                <form method='POST' action='delete_order.php' style='display:inline;' onsubmit="return confirm('Are you sure you want to hide Order ID: <?php echo htmlspecialchars($single_order['id']); ?>?');">
-                                    <input type='hidden' name='order_id_to_delete' value='<?php echo htmlspecialchars($single_order['id']); ?>'>
-                                    <button type='submit' class='action-btn action-btn-delete' title='Hide this order from the active list'>Hide</button>
-                                </form>
+                                <form method='POST' action='delete_order.php' style='display:inline;' onsubmit="return confirm('Are you sure you want to hide Order ID: <?php echo htmlspecialchars($single_order['id']); ?>?');"><input type='hidden' name='order_id_to_delete' value='<?php echo htmlspecialchars($single_order['id']); ?>'><button type='submit' class='action-btn action-btn-delete' title='Hide this order from the active list'>Hide</button></form>
                                 </div>
                                 </td></tr>
                             <?php endforeach; ?>
@@ -596,6 +636,272 @@ $current_total_pending_all_time = getCurrentTotalPendingOrders($all_site_orders_
                         <?php endif; ?>
                     </div>
                 </div>
+
+                <?php elseif ($page === 'products'): ?>
+                <div class="content-card">
+                    <h2 class="card-title">Manage Products</h2>
+                    <?php if ($products_load_error): ?>
+                        <div class="alert-message alert-danger"><?php echo htmlspecialchars($products_load_error); ?></div>
+                    <?php else: ?>
+                        <div style="margin-bottom: 1.5rem; text-align: right;">
+                            <a href="admin_dashboard.php?page=edit_product" class="action-btn" style="background-color: var(--primary-color); color: white !important; border-color: var(--primary-color);">
+                                <i class="fas fa-plus"></i> Add New Product
+                            </a>
+                        </div>
+                        <div class="orders-table-container">
+                            <?php if (empty($products)): ?>
+                                <p class='no-orders-message'>No products found.</p>
+                            <?php else: ?>
+                                <table class='orders-table'>
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Name</th>
+                                            <th>Category</th>
+                                            <th>Price</th>
+                                            <th>Stock</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($products as $product): ?>
+                                            <tr>
+                                                <td data-label='ID' style="font-weight:500;"><?php echo htmlspecialchars($product['id']); ?></td>
+                                                <td data-label='Name'><?php echo htmlspecialchars($product['name']); ?></td>
+                                                <td data-label='Category'><?php echo htmlspecialchars($product['category'] ?? 'N/A'); ?></td>
+                                                <td data-label='Price'>
+                                                    <?php
+                                                        if (isset($product['durations']) && !empty($product['durations'])) {
+                                                            echo "Multiple";
+                                                        } else {
+                                                            echo '৳' . htmlspecialchars(number_format(floatval($product['price'] ?? 0), 2));
+                                                        }
+                                                    ?>
+                                                </td>
+                                                <td data-label='Stock'><?php echo htmlspecialchars($product['stock'] ?? 'N/A'); ?></td>
+                                                <td data-label='Actions'>
+                                                    <div class="action-buttons-group">
+                                                        <a href="admin_dashboard.php?page=edit_product&id=<?php echo htmlspecialchars($product['id']); ?>" class="action-btn">Edit</a>
+                                                        <form method="POST" action="delete_product.php" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this product?');">
+                                                            <input type="hidden" name="product_id_to_delete" value="<?php echo htmlspecialchars($product['id']); ?>">
+                                                            <button type="submit" class="action-btn action-btn-cancel">Delete</button>
+                                                        </form>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            <?php endif; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+
+                <?php elseif ($page === 'edit_product'):
+                    $is_edit_mode = isset($_GET['id']);
+                    $product_to_edit = null;
+                    $form_error = null;
+
+                    if ($is_edit_mode) {
+                        $product_id = $_GET['id'];
+                        $all_products_raw = file_get_contents(__DIR__ . '/products.json');
+                        $all_products = json_decode($all_products_raw, true);
+                        if ($all_products) {
+                            foreach ($all_products as $p) {
+                                if ($p['id'] == $product_id) {
+                                    $product_to_edit = $p;
+                                    break;
+                                }
+                            }
+                        }
+                        if (!$product_to_edit) {
+                            $form_error = "Product with ID " . htmlspecialchars($product_id) . " not found.";
+                        }
+                    } else {
+                        // Default values for a new product
+                        $product_to_edit = [
+                            'id' => '', 'name' => '', 'description' => '', 'longDescription' => '', 'category' => '',
+                            'price' => 0, 'image' => '', 'stock' => 0, 'isFeatured' => false, 'durations' => []
+                        ];
+                    }
+                ?>
+                <div class="content-card">
+                    <h2 class="card-title"><?php echo $is_edit_mode ? 'Edit Product' : 'Add New Product'; ?></h2>
+                    <?php if ($form_error): ?>
+                        <div class="alert-message alert-danger"><?php echo $form_error; ?></div>
+                    <?php else: ?>
+                    <form action="save_product.php" method="POST" class="product-form">
+                        <?php if ($is_edit_mode): ?>
+                            <input type="hidden" name="id" value="<?php echo htmlspecialchars($product_to_edit['id']); ?>">
+                        <?php endif; ?>
+
+                        <div class="form-group">
+                            <label for="name">Product Name</label>
+                            <input type="text" id="name" name="name" value="<?php echo htmlspecialchars($product_to_edit['name']); ?>" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="description">Short Description</label>
+                            <textarea id="description" name="description" rows="3"><?php echo htmlspecialchars($product_to_edit['description']); ?></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="longDescription">Long Description</label>
+                            <textarea id="longDescription" name="longDescription" rows="6"><?php echo htmlspecialchars($product_to_edit['longDescription']); ?></textarea>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="category">Category</label>
+                                <select id="category" name="category">
+                                    <?php foreach ($categories as $cat): ?>
+                                        <option value="<?php echo htmlspecialchars($cat['id']); ?>" <?php echo ($product_to_edit['category'] === $cat['id']) ? 'selected' : ''; ?>>
+                                            <?php echo htmlspecialchars($cat['name']); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="price">Base Price</label>
+                                <input type="number" step="0.01" id="price" name="price" value="<?php echo htmlspecialchars($product_to_edit['price']); ?>">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="image">Image URL</label>
+                                <input type="text" id="image" name="image" value="<?php echo htmlspecialchars($product_to_edit['image']); ?>">
+                            </div>
+                            <div class="form-group">
+                                <label for="stock">Stock Quantity</label>
+                                <input type="number" id="stock" name="stock" value="<?php echo htmlspecialchars($product_to_edit['stock']); ?>">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="durations">Durations (JSON format)</label>
+                            <textarea id="durations" name="durations" rows="4" placeholder='[{"label": "1 Month", "price": 100}, {"label": "1 Year", "price": 1000}]'><?php echo htmlspecialchars(json_encode($product_to_edit['durations'], JSON_PRETTY_PRINT)); ?></textarea>
+                            <small>Enter as a valid JSON array of objects, or leave empty if not applicable.</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="isFeatured">
+                                <input type="checkbox" id="isFeatured" name="isFeatured" value="true" <?php echo ($product_to_edit['isFeatured'] ?? false) ? 'checked' : ''; ?>>
+                                Is this a featured product?
+                            </label>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="action-btn" style="background-color: var(--primary-color); color: white !important;">Save Product</button>
+                            <a href="admin_dashboard.php?page=products" class="action-btn">Cancel</a>
+                        </div>
+                    </form>
+                    <?php endif; ?>
+                </div>
+                <style>
+                    .product-form .form-group { margin-bottom: 1rem; }
+                    .product-form label { display: block; font-weight: 500; margin-bottom: 0.5rem; }
+                    .product-form input[type="text"],
+                    .product-form input[type="number"],
+                    .product-form textarea {
+                        width: 100%;
+                        padding: 0.75rem;
+                        border: 1px solid var(--border-color);
+                        border-radius: var(--border-radius);
+                        font-size: 0.9rem;
+                    }
+                    .product-form textarea { min-height: 80px; font-family: inherit; }
+                    .product-form .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+                    .product-form .form-actions { margin-top: 1.5rem; text-align: right; }
+                </style>
+
+                <?php elseif ($page === 'categories'):
+                    $category_to_edit = null;
+                    if (isset($_GET['edit_id'])) {
+                        foreach ($categories as $c) {
+                            if ($c['id'] == $_GET['edit_id']) {
+                                $category_to_edit = $c;
+                                break;
+                            }
+                        }
+                    }
+                ?>
+                <div class="content-card">
+                    <h2 class="card-title"><?php echo $category_to_edit ? 'Edit Category' : 'Add New Category'; ?></h2>
+                    <form action="save_category.php" method="POST" class="product-form">
+                        <?php if ($category_to_edit): ?>
+                            <input type="hidden" name="original_id" value="<?php echo htmlspecialchars($category_to_edit['id']); ?>">
+                        <?php endif; ?>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="id">Category ID</label>
+                                <input type="text" id="id" name="id" value="<?php echo htmlspecialchars($category_to_edit['id'] ?? ''); ?>" required>
+                                <small>Short, lowercase, no spaces (e.g., 'new_arrivals')</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="name">Category Name</label>
+                                <input type="text" id="name" name="name" value="<?php echo htmlspecialchars($category_to_edit['name'] ?? ''); ?>" required>
+                                <small>The full name for display (e.g., 'New Arrivals')</small>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="icon">FontAwesome Icon</label>
+                            <input type="text" id="icon" name="icon" value="<?php echo htmlspecialchars($category_to_edit['icon'] ?? 'fas fa-tag'); ?>">
+                            <small>e.g., 'fas fa-book-open'</small>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="action-btn" style="background-color: var(--primary-color); color: white !important;">Save Category</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="content-card">
+                    <h2 class="card-title">Existing Categories</h2>
+                    <?php if ($categories_load_error): ?>
+                        <div class="alert-message alert-danger"><?php echo htmlspecialchars($categories_load_error); ?></div>
+                    <?php elseif (empty($categories)): ?>
+                        <p class="no-orders-message">No categories found.</p>
+                    <?php else: ?>
+                        <div class="orders-table-container">
+                            <table class="orders-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th>Icon</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($categories as $category): ?>
+                                    <tr>
+                                        <td><?php echo htmlspecialchars($category['id']); ?></td>
+                                        <td><?php echo htmlspecialchars($category['name']); ?></td>
+                                        <td><i class="<?php echo htmlspecialchars($category['icon']); ?>"></i> (<?php echo htmlspecialchars($category['icon']); ?>)</td>
+                                        <td>
+                                            <div class="action-buttons-group">
+                                                <a href="admin_dashboard.php?page=categories&edit_id=<?php echo htmlspecialchars($category['id']); ?>" class="action-btn">Edit</a>
+                                                <form action="delete_category.php" method="POST" onsubmit="return confirm('Are you sure you want to delete this category?');" style="display:inline;">
+                                                    <input type="hidden" name="category_id_to_delete" value="<?php echo htmlspecialchars($category['id']); ?>">
+                                                    <button type="submit" class="action-btn action-btn-cancel">Delete</button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    <?php endif; ?>
+                </div>
+
+                <?php else: ?>
+                <div class="content-card">
+                    <h2 class="card-title">Page Not Found</h2>
+                    <p>The page you requested could not be found.</p>
+                </div>
+                <?php endif; ?>
+
             </div>
         </main>
     </div>
