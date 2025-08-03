@@ -2918,7 +2918,7 @@ src="https://www.facebook.com/tr?id=482675157669768&ev=PageView&noscript=1"
             setupImageLoading();
         }
 
-function renderReviews(product) {
+async function renderReviews(product) {
     const reviewsTab = document.getElementById('reviewsTab');
     if (!reviewsTab) return;
 
@@ -2932,67 +2932,76 @@ function renderReviews(product) {
     `;
     reviewsTab.insertAdjacentHTML('beforeend', reviewInputHTML);
 
-    if (!product.reviews || product.reviews.length === 0) {
-        reviewsTab.insertAdjacentHTML('beforeend', '<p style="padding: 1rem 0; text-align: center; color: #777;">There are no reviews for this product yet. Be the first to write one!</p>');
-        return;
-    }
+    try {
+        const response = await fetch(`fetch_reviews.php?product_id=${product.id}`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch reviews.');
+        }
+        const allReviews = await response.json();
+        const approvedReviews = allReviews.filter(review => review.status === 'approved');
 
-    const reviewsContainer = document.createElement('div');
-    reviewsContainer.className = 'reviews-list';
-
-    const reviewsToShow = 3;
-    const allReviews = product.reviews;
-
-    // Sort reviews by date, newest first
-    allReviews.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-    allReviews.forEach((review, index) => {
-        const reviewElement = document.createElement('div');
-        reviewElement.className = 'review-item';
-        if (index >= reviewsToShow) {
-            reviewElement.style.display = 'none';
+        if (approvedReviews.length === 0) {
+            reviewsTab.insertAdjacentHTML('beforeend', '<p style="padding: 1rem 0; text-align: center; color: #777;">There are no reviews for this product yet. Be the first to write one!</p>');
+            return;
         }
 
-        const authorInitials = review.author.split(' ').map(n => n[0]).join('').toUpperCase();
-        const avatarHTML = review.avatar
-            ? `<img src="${review.avatar}" alt="${review.author}" class="review-avatar">`
-            : `<div class="review-avatar-initials"><span>${authorInitials}</span></div>`;
+        const reviewsContainer = document.createElement('div');
+        reviewsContainer.className = 'reviews-list';
 
-        const ratingHTML = Array(5).fill(0).map((_, i) =>
-            `<i class="fas fa-star ${i < review.rating ? 'filled' : ''}"></i>`
-        ).join('');
+        const reviewsToShow = 3;
 
-        reviewElement.innerHTML = `
-            <div class="review-header">
-                <div class="review-avatar-wrapper">${avatarHTML}</div>
-                <div class="review-author-details">
-                    <span class="review-author">${review.author}</span>
-                    <div class="review-rating">${ratingHTML}</div>
+        // Sort reviews by date, newest first
+        approvedReviews.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+        approvedReviews.forEach((review, index) => {
+            const reviewElement = document.createElement('div');
+            reviewElement.className = 'review-item';
+            if (index >= reviewsToShow) {
+                reviewElement.style.display = 'none';
+            }
+
+            const authorInitials = review.customer_name.split(' ').map(n => n[0]).join('').toUpperCase();
+            const avatarHTML = `<div class="review-avatar-initials"><span>${authorInitials}</span></div>`;
+
+            const ratingHTML = Array(5).fill(0).map((_, i) =>
+                `<i class="fas fa-star ${i < review.rating ? 'filled' : ''}"></i>`
+            ).join('');
+
+            reviewElement.innerHTML = `
+                <div class="review-header">
+                    <div class="review-avatar-wrapper">${avatarHTML}</div>
+                    <div class="review-author-details">
+                        <span class="review-author">${review.customer_name}</span>
+                        <div class="review-rating">${ratingHTML}</div>
+                    </div>
+                    <span class="review-date">${new Date(review.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
                 </div>
-                <span class="review-date">${new Date(review.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
-            </div>
-            <div class="review-body">
-                 <p class="review-text">${review.text}</p>
-            </div>
-        `;
-        reviewsContainer.appendChild(reviewElement);
-    });
+                <div class="review-body">
+                     <p class="review-text">${review.review_text}</p>
+                </div>
+            `;
+            reviewsContainer.appendChild(reviewElement);
+        });
 
-    reviewsTab.appendChild(reviewsContainer);
+        reviewsTab.appendChild(reviewsContainer);
 
-    if (allReviews.length > reviewsToShow) {
-        const seeMoreBtn = document.createElement('button');
-        seeMoreBtn.className = 'see-more-reviews-btn';
-        seeMoreBtn.textContent = `See All ${allReviews.length} Reviews`;
-        seeMoreBtn.onclick = function(e) {
-            e.preventDefault();
-            const hiddenReviews = reviewsContainer.querySelectorAll('.review-item[style*="display: none"]');
-            hiddenReviews.forEach(review => {
-                review.style.display = 'block';
-            });
-            seeMoreBtn.style.display = 'none';
-        };
-        reviewsTab.appendChild(seeMoreBtn);
+        if (approvedReviews.length > reviewsToShow) {
+            const seeMoreBtn = document.createElement('button');
+            seeMoreBtn.className = 'see-more-reviews-btn';
+            seeMoreBtn.textContent = `See All ${approvedReviews.length} Reviews`;
+            seeMoreBtn.onclick = function(e) {
+                e.preventDefault();
+                const hiddenReviews = reviewsContainer.querySelectorAll('.review-item[style*="display: none"]');
+                hiddenReviews.forEach(review => {
+                    review.style.display = 'block';
+                });
+                seeMoreBtn.style.display = 'none';
+            };
+            reviewsTab.appendChild(seeMoreBtn);
+        }
+    } catch (error) {
+        console.error("Error fetching reviews:", error);
+        reviewsTab.insertAdjacentHTML('beforeend', '<p style="padding: 1rem 0; text-align: center; color: #900;">Could not load reviews.</p>');
     }
 }
 

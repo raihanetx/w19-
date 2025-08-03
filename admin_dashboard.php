@@ -182,6 +182,29 @@ if ($page === 'coupons' || $page === 'edit_coupon') {
     }
 }
 // ---------------------------------------------------------
+
+// ---------- LOAD REVIEWS ----------
+$reviews = [];
+$reviews_load_error = null;
+if ($page === 'reviews' || $page === 'edit_review') {
+    $reviews_file_path = __DIR__ . '/reviews.json';
+    if (file_exists($reviews_file_path)) {
+        $json_review_data = file_get_contents($reviews_file_path);
+        if ($json_review_data === false) {
+            $reviews_load_error = "Could not read reviews.json file.";
+        } else {
+            $decoded_reviews = json_decode($json_review_data, true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded_reviews)) {
+                $reviews = $decoded_reviews;
+            } else {
+                $reviews_load_error = "Critical Error: Could not decode reviews.json. Error: " . json_last_error_msg();
+            }
+        }
+    } else {
+        $reviews_load_error = "reviews.json file not found.";
+    }
+}
+// ---------------------------------------------------------
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -548,6 +571,7 @@ if ($page === 'coupons' || $page === 'edit_coupon') {
                     <li><a href="admin_dashboard.php?page=products" class="<?php echo ($page === 'products') ? 'active' : ''; ?>"><i class="fas fa-box"></i> <span>Manage Products</span></a></li>
                     <li><a href="admin_dashboard.php?page=categories" class="<?php echo ($page === 'categories') ? 'active' : ''; ?>"><i class="fas fa-tags"></i> <span>Manage Categories</span></a></li>
                     <li><a href="admin_dashboard.php?page=coupons" class="<?php echo ($page === 'coupons') ? 'active' : ''; ?>"><i class="fas fa-gift"></i> <span>Manage Coupons</span></a></li>
+                    <li><a href="admin_dashboard.php?page=reviews" class="<?php echo ($page === 'reviews') ? 'active' : ''; ?>"><i class="fas fa-star"></i> <span>Manage Reviews</span></a></li>
                     <li><a href="admin_dashboard.php?logout=1"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a></li>
                 </ul>
             </nav>
@@ -1002,6 +1026,106 @@ if ($page === 'coupons' || $page === 'edit_coupon') {
                         </div>
                     <?php endif; ?>
                 </div>
+                <?php elseif ($page === 'reviews'):
+                    $pending_reviews = array_filter($reviews, fn($review) => $review['status'] === 'pending');
+                    $approved_reviews = array_filter($reviews, fn($review) => $review['status'] === 'approved');
+                    $rejected_reviews = array_filter($reviews, fn($review) => $review['status'] === 'rejected');
+                ?>
+                <div class="content-card">
+                    <h2 class="card-title">Manage Reviews</h2>
+                    <div class="tabs">
+                        <a href="?page=reviews&tab=pending" class="tab-link <?php echo ($_GET['tab'] ?? 'pending') === 'pending' ? 'active' : ''; ?>">Pending (<?php echo count($pending_reviews); ?>)</a>
+                        <a href="?page=reviews&tab=approved" class="tab-link <?php echo ($_GET['tab'] ?? '') === 'approved' ? 'active' : ''; ?>">Approved (<?php echo count($approved_reviews); ?>)</a>
+                        <a href="?page=reviews&tab=rejected" class="tab-link <?php echo ($_GET['tab'] ?? '') === 'rejected' ? 'active' : ''; ?>">Rejected (<?php echo count($rejected_reviews); ?>)</a>
+                    </div>
+                    <div class="orders-table-container">
+                        <?php
+                            $current_tab = $_GET['tab'] ?? 'pending';
+                            $reviews_to_display = [];
+                            if ($current_tab === 'pending') {
+                                $reviews_to_display = $pending_reviews;
+                            } elseif ($current_tab === 'approved') {
+                                $reviews_to_display = $approved_reviews;
+                            } elseif ($current_tab === 'rejected') {
+                                $reviews_to_display = $rejected_reviews;
+                            }
+                        ?>
+                        <?php if ($reviews_load_error): ?>
+                            <div class="alert-message alert-danger"><?php echo htmlspecialchars($reviews_load_error); ?></div>
+                        <?php elseif (empty($reviews_to_display)): ?>
+                            <p class="no-orders-message">No reviews to display in this tab.</p>
+                        <?php else: ?>
+                            <table class="orders-table">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Customer</th>
+                                        <th>Review</th>
+                                        <th>Rating</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($reviews_to_display as $review): ?>
+                                    <tr>
+                                        <td><?php echo htmlspecialchars($review['product_id']); ?></td>
+                                        <td><?php echo htmlspecialchars($review['customer_name']); ?></td>
+                                        <td><?php echo htmlspecialchars($review['review_text']); ?></td>
+                                        <td><?php echo htmlspecialchars($review['rating']); ?>/5</td>
+                                        <td>
+                                            <span class="status-badge status-<?php echo htmlspecialchars($review['status']); ?>">
+                                                <?php echo htmlspecialchars($review['status']); ?>
+                                            </span>
+                                            <?php if ($review['is_featured']): ?>
+                                                <span class="status-badge status-featured">Featured</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td>
+                                            <div class="action-buttons-group">
+                                                <?php if ($review['status'] === 'pending'): ?>
+                                                    <a href="update_review.php?id=<?php echo htmlspecialchars($review['id']); ?>&status=approved" class="action-btn">Approve</a>
+                                                    <a href="update_review.php?id=<?php echo htmlspecialchars($review['id']); ?>&status=rejected" class="action-btn">Reject</a>
+                                                <?php endif; ?>
+                                                <a href="admin_dashboard.php?page=reviews&edit_id=<?php echo htmlspecialchars($review['id']); ?>" class="action-btn">Edit</a>
+                                                <a href="delete_review.php?id=<?php echo htmlspecialchars($review['id']); ?>" class="action-btn action-btn-cancel" onclick="return confirm('Are you sure?')">Delete</a>
+                                                <?php if ($review['status'] === 'approved'): ?>
+                                                    <a href="update_review.php?id=<?php echo htmlspecialchars($review['id']); ?>&featured=<?php echo $review['is_featured'] ? '0' : '1'; ?>" class="action-btn">
+                                                        <?php echo $review['is_featured'] ? 'Unfeature' : 'Feature'; ?>
+                                                    </a>
+                                                <?php endif; ?>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <style>
+                    .tabs {
+                        display: flex;
+                        margin-bottom: 1.5rem;
+                        border-bottom: 1px solid var(--border-color);
+                    }
+                    .tab-link {
+                        padding: 0.75rem 1.25rem;
+                        text-decoration: none;
+                        color: var(--text-muted);
+                        border-bottom: 2px solid transparent;
+                        margin-bottom: -1px;
+                    }
+                    .tab-link.active {
+                        color: var(--primary-color);
+                        border-bottom-color: var(--primary-color);
+                    }
+                    .status-featured {
+                        background-color: var(--primary-color);
+                        color: white;
+                        border-color: var(--primary-color-darker);
+                    }
+                </style>
                 <?php else: ?>
                 <div class="content-card">
                     <h2 class="card-title">Page Not Found</h2>
