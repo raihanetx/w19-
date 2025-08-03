@@ -55,4 +55,3 @@ if (file_put_contents($reviews_file_path, $json_data) === false) {
 
 header("Location: admin_dashboard.php?page=reviews&status=success");
 exit();
-?>

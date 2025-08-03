@@ -49,7 +49,7 @@ if (!$category_found_and_deleted) {
 $new_json_data = json_encode(array_values($updated_categories), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 
 if (file_put_contents($categories_file_path, $new_json_data)) {
-    header("Location: admin_dashboard.php?page=categories&status=delete_success");
+    header("Location: admin_dashboard.php?page=categories&status=success");
 } else {
     header("Location: admin_dashboard.php?page=categories&error=file_save_failed_on_delete");
 }

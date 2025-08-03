@@ -69,4 +69,3 @@ if (file_put_contents($coupons_file_path, $json_data) === false) {
 
 header("Location: admin_dashboard.php?page=coupons&status=success");
 exit();
-?>

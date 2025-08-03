@@ -43,6 +43,5 @@ if (file_put_contents($reviews_file_path, $json_data) === false) {
     exit();
 }
 
-header("Location: admin_dashboard.php?page=reviews&status=deleted");
+header("Location: admin_dashboard.php?page=reviews&status=success");
 exit();
-?>

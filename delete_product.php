@@ -54,7 +54,7 @@ if (!$product_found_and_deleted) {
 $new_json_data = json_encode($updated_products, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 
 if (file_put_contents($products_file_path, $new_json_data)) {
-    header("Location: admin_dashboard.php?page=products&status=delete_success");
+    header("Location: admin_dashboard.php?page=products&status=success");
 } else {
     header("Location: admin_dashboard.php?page=products&error=file_save_failed_on_delete");
 }
