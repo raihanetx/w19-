@@ -240,14 +240,13 @@ if ($page === 'reviews' || $page === 'edit_review') {
             font-family: var(--font-family-sans-serif);
             background-color: var(--background-color);
             color: var(--text-color);
-            line-height: 1.65;
-            font-size: 14px; /* Base font size for a more compact UI */
+            line-height: 1.6;
+            font-size: 16px;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
         .admin-wrapper { display: flex; min-height: 100vh; }
         
-        /* --- START: UPDATED SIDEBAR STYLES --- */
         .admin-sidebar {
             background-color: var(--sidebar-bg);
             width: 250px;
@@ -258,10 +257,14 @@ if ($page === 'reviews' || $page === 'edit_review') {
             transition: transform 0.3s ease-in-out;
             z-index: 1001;
             box-shadow: var(--box-shadow);
-            transform: translateX(-100%);
         }
-        .admin-sidebar.open {
-            transform: translateX(0);
+        @media (max-width: 767.98px) {
+            .admin-sidebar {
+                transform: translateX(-100%);
+            }
+            .admin-sidebar.open {
+                transform: translateX(0);
+            }
         }
 
         .admin-sidebar .logo-admin { text-align: center; margin-bottom: 2rem; }
@@ -296,22 +299,20 @@ if ($page === 'reviews' || $page === 'edit_review') {
             color: var(--sidebar-active-icon-color);
         }
         .admin-sidebar .admin-nav li a i {
-            margin-right: 0.85rem; 
-            width: 18px; 
+            margin-right: 1rem;
+            width: 20px;
             text-align: center;
-            font-size: 1rem; 
+            font-size: 1.1rem;
             color: var(--sidebar-icon-color);
-            transition: color 0.2s ease;
+            transition: color 0.3s ease;
         }
 
-        /* --- START: UPDATED MAIN CONTENT STYLES --- */
         .admin-main-content {
-            margin-left: 0; /* No margin by default */
-            width: 100%; /* Full width by default */
+            margin-left: 250px;
+            width: calc(100% - 250px);
             padding: 0;
-            transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: margin-left 0.3s ease-in-out, width 0.3s ease-in-out;
         }
-        /* --- END: UPDATED MAIN CONTENT STYLES --- */
         
         .admin-topbar {
             background-color: var(--card-bg-color);
@@ -331,8 +332,19 @@ if ($page === 'reviews' || $page === 'edit_review') {
             cursor: pointer; 
             color: var(--text-muted); 
             margin-right: 1.5rem; 
-            display: inline-block;
-            transition: color 0.3s ease;
+            display: none;
+            transition: color 0.3s ease, transform 0.3s ease;
+            background: none;
+            border: none;
+        }
+        @media (max-width: 767.98px) {
+            .admin-main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+            .admin-topbar .sidebar-toggle {
+                display: inline-block;
+            }
         }
 
         .admin-topbar .sidebar-toggle:hover { color: var(--primary-color); }
@@ -343,23 +355,21 @@ if ($page === 'reviews' || $page === 'edit_review') {
             font-weight: 600; 
         }
         .admin-topbar .logout-btn {
-            background-color: transparent;
-            color: var(--primary-color);
+            background-color: var(--primary-color);
+            color: white;
             padding: 0.5rem 1rem;
             text-decoration: none;
             border-radius: var(--border-radius);
             font-weight: 500;
-            border: 1px solid var(--primary-color);
-            transition: background-color 0.2s ease, color 0.2s ease;
-            font-size: 0.85rem;
+            border: none;
+            transition: background-color 0.3s ease;
         }
         .admin-topbar .logout-btn:hover {
-            background-color: var(--primary-color);
-            color: white;
+            background-color: var(--primary-color-darker);
         }
-        .admin-topbar .logout-btn i { margin-right: 5px; }
+        .admin-topbar .logout-btn i { margin-right: 0.5rem; }
 
-        .admin-page-content { padding: 2rem; } /* Consistent padding */
+        .admin-page-content { padding: 2rem; }
         
         .content-card {
             background-color: var(--card-bg-color);
@@ -383,10 +393,7 @@ if ($page === 'reviews' || $page === 'edit_review') {
         table.orders-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.875rem;
-            border: 1px solid var(--border-color); /* Table border */
-            border-radius: var(--border-radius);
-            overflow: hidden; /* For border-radius on table */
+            font-size: 1rem;
         }
         .orders-table th, .orders-table td {
             border-bottom: 1px solid var(--border-color);
@@ -404,15 +411,7 @@ if ($page === 'reviews' || $page === 'edit_review') {
             letter-spacing: 0.05em;
         }
         .orders-table tr:last-child td { border-bottom: none; }
-        .orders-table td { color: var(--text-color); }
-        .orders-table tr:hover td { background-color: #fcfdff; } 
-        
-        .orders-table td[data-label='Customer Info'] strong { font-weight: 500; display: block; margin-bottom: 2px;}
-        .orders-table td[data-label='Customer Info'] small { color: var(--text-muted); font-size: 0.9em;}
-
-        .order-items-list-admin { list-style: none; padding: 0; margin: 0; }
-        .order-items-list-admin li { margin-bottom: 3px; font-size: 0.9em; color: var(--text-muted); }
-        .order-items-list-admin li .item-price { color: var(--text-muted); }
+        .orders-table tr:hover td { background-color: #f8f9fa; }
         
         .status-badge {
             padding: 0.25em 0.6em;
@@ -448,107 +447,37 @@ if ($page === 'reviews' || $page === 'edit_review') {
         .action-btn-delete { background-color: #6c757d; }
         .action-btn-delete:hover { background-color: #5a6268; }
         
-        .action-btn-text { color: var(--text-color); font-weight: 500; font-size: 0.9rem; }
-        .action-btn-text.confirmed { color: #198754; }
-        .action-btn-text.cancelled { color: #dc3545; }
-        .action-btn-text small { font-size: 0.8em; color: var(--text-muted); display: block; line-height: 1.2; }
-
-        .alert-message {
-            padding: 0.85rem 1.25rem;
-            margin-bottom: 1.5rem;
-            border-radius: var(--border-radius);
-            font-weight: 400; /* Normal weight */
-            border: 1px solid transparent;
-            font-size: 0.9rem;
-        }
-        .alert-success { background-color: #e6fffa; color: #00684a; border-color: #bcf0e4;}
-        .alert-danger { background-color: #fff0f1; color: #a01326; border-color: #ffd9dd;}
-        
-        .stats-period-selector {
-            margin-bottom: 1.5rem;
-            display: flex; 
-            align-items: center;
-            flex-wrap: wrap; 
-            gap: 0.75rem; /* Reduced gap */
-        }
-        .stats-period-selector label { font-weight: 500; margin-right: 0.25rem; font-size:0.9rem; color: var(--text-muted); }
-        .stats-period-selector select {
-            padding: 0.5rem 0.75rem;
-            border-radius: var(--border-radius);
+        .product-form .form-group { margin-bottom: 1.5rem; }
+        .product-form label { display: block; font-weight: 600; margin-bottom: 0.5rem; }
+        .product-form input[type="text"],
+        .product-form input[type="number"],
+        .product-form textarea,
+        .product-form select {
+            width: 100%;
+            padding: 0.8rem 1rem;
             border: 1px solid var(--border-color);
-            font-size: 0.9rem;
-            background-color: white;
-            min-width: 130px;
-        }
-        .stats-period-selector select:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb),.2);
-            outline: 0;
-        }
-        .stats-period-selector p { margin: 0; margin-left:auto; font-size:0.9rem; color: var(--text-muted); }
-        .stats-period-selector p strong { font-weight: 600; color: var(--text-color); }
-        
-        #stats-display-area {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); 
-            gap: 1.25rem; 
-        }
-        .stat-card {
-            background-color: var(--card-bg-color);
-            padding: 1.25rem; 
             border-radius: var(--border-radius);
-            text-align: left;
-            border: 1px solid var(--border-color);
-            box-shadow: none; /* Flatter cards */
-            transition: border-color 0.2s ease;
-        }
-        .stat-card:hover { border-color: var(--primary-color); }
-        .stat-card h4 {
-            margin-top: 0;
-            margin-bottom: 0.25rem; /* Less space */
-            font-size: 0.8rem; 
-            color: var(--text-muted); 
-            text-transform: none; /* No uppercase */
-            letter-spacing: 0;
-            font-weight: 400; /* Lighter weight */
-        }
-        .stat-card p {
-            font-size: 1.75rem; 
-            font-weight: 600; 
-            color: var(--text-color);
-            margin: 0;
-            line-height: 1.1;
-        }
-        .stat-card#stat_total_revenue_card p {
-            color: var(--primary-color); 
-        }
-        .no-orders-message {
-            text-align: center;
-            padding: 2.5rem 1rem;
-            color: var(--text-muted);
             font-size: 1rem;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
-
-        /* --- START: REMOVED OLD MEDIA QUERY FOR LAYOUT --- */
-        @media (max-width: 991.98px) {
-            /* Old layout rules are removed. Now only styling adjustments remain */
+        .product-form input[type="text"]:focus,
+        .product-form input[type="number"]:focus,
+        .product-form textarea:focus,
+        .product-form select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.2);
         }
-        /* --- END: REMOVED OLD MEDIA QUERY --- */
+        .product-form textarea { min-height: 120px; font-family: inherit; }
+        .product-form .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        .product-form .form-actions { margin-top: 2rem; text-align: right; }
 
         @media (max-width: 767.98px) {
-            body { font-size: 13.5px; }
-            .admin-topbar { padding: 0.75rem 1rem; }
-            .admin-topbar h1 { font-size: 1.15rem; }
-            .admin-page-content { padding: 1.25rem 1rem; }
-            .content-card { padding: 1.25rem; }
-            .content-card h2.card-title { font-size: 1.1rem; }
-            #stats-display-area { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; }
-            .stat-card p { font-size: 1.5rem; }
-            .orders-table th, .orders-table td { padding: 0.75rem; font-size: 0.825rem;}
-            .action-btn { font-size:0.75rem; padding: 0.35rem 0.65rem; }
-            .action-buttons-group { flex-direction: column; align-items: stretch; width: 100%; }
-            .action-buttons-group form, .action-buttons-group .action-btn { width: 100%; }
-            .action-buttons-group .action-btn { justify-content: center; }
+            .admin-page-content { padding: 1rem; }
+            .admin-topbar { padding: 1rem; }
+            .admin-topbar h1 { font-size: 1.2rem; }
+            .orders-table th, .orders-table td { padding: 0.75rem; }
+            .product-form .form-row { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -561,27 +490,25 @@ if ($page === 'reviews' || $page === 'edit_review') {
             <nav class="admin-nav">
                 <ul>
                     <li><a href="admin_dashboard.php?page=dashboard" class="<?php echo ($page === 'dashboard') ? 'active' : ''; ?>"><i class="fas fa-chart-pie"></i> <span>Dashboard</span></a></li>
-                    <li><a href="admin_dashboard.php?page=products" class="<?php echo ($page === 'products') ? 'active' : ''; ?>"><i class="fas fa-box"></i> <span>Manage Products</span></a></li>
-                    <li><a href="admin_dashboard.php?page=categories" class="<?php echo ($page === 'categories') ? 'active' : ''; ?>"><i class="fas fa-tags"></i> <span>Manage Categories</span></a></li>
-                    <li><a href="admin_dashboard.php?page=coupons" class="<?php echo ($page === 'coupons') ? 'active' : ''; ?>"><i class="fas fa-gift"></i> <span>Manage Coupons</span></a></li>
-                    <li><a href="admin_dashboard.php?page=reviews" class="<?php echo ($page === 'reviews') ? 'active' : ''; ?>"><i class="fas fa-star"></i> <span>Manage Reviews</span></a></li>
+                    <li><a href="admin_dashboard.php?page=products" class="<?php echo ($page === 'products') ? 'active' : ''; ?>"><i class="fas fa-box"></i> <span>Products</span></a></li>
+                    <li><a href="admin_dashboard.php?page=categories" class="<?php echo ($page === 'categories') ? 'active' : ''; ?>"><i class="fas fa-tags"></i> <span>Categories</span></a></li>
+                    <li><a href="admin_dashboard.php?page=coupons" class="<?php echo ($page === 'coupons') ? 'active' : ''; ?>"><i class="fas fa-gift"></i> <span>Coupons</span></a></li>
+                    <li><a href="admin_dashboard.php?page=reviews" class="<?php echo ($page === 'reviews') ? 'active' : ''; ?>"><i class="fas fa-star"></i> <span>Reviews</span></a></li>
                     <li><a href="admin_dashboard.php?logout=1"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a></li>
                 </ul>
             </nav>
         </aside>
         <main class="admin-main-content" id="adminMainContent">
             <header class="admin-topbar">
-                <div style="display:flex; align-items:center;">
-                    <i class="fas fa-bars sidebar-toggle" id="sidebarToggle"></i>
-                    <h1>Admin Panel</h1>
-                </div>
+                <button class="sidebar-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+                <h1><?php echo ucfirst($page); ?></h1>
                 <a href="admin_dashboard.php?logout=1" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
             </header>
 
-            <div class="admin-page-content">
+            <section class="admin-page-content">
 
                 <?php if ($page === 'dashboard'): ?>
-                <div class="content-card">
+                <section class="content-card">
                     <h2 class="card-title">Performance Overview</h2>
                     <div class="stats-period-selector">
                         <label for="period_selector">Showing stats for:</label>
@@ -604,8 +531,8 @@ if ($page === 'reviews' || $page === 'edit_review') {
                         <div class="stat-card"><h4>Pending (Period)</h4><p id="stat_pending_orders_in_period">0</p></div>
                         <div class="stat-card" id="stat_total_revenue_card"><h4>Total Revenue</h4><p id="stat_total_revenue">৳0.00</p></div>
                     </div>
-                </div>
-                <div class="content-card">
+                </section>
+                <section class="content-card">
                     <h2 class="card-title">Manage Orders</h2>
                     <?php if ($json_load_error): ?>
                         <div class="alert-message alert-danger"><?php echo htmlspecialchars($json_load_error); ?></div>
@@ -661,7 +588,7 @@ if ($page === 'reviews' || $page === 'edit_review') {
                                 <td data-label='Actions'>
                                 <div class="action-buttons-group">
                                 <?php if ($order_status_val === 'pending'): ?>
-                                    <form method='POST' action='confirm_order.php' style='display:inline;'><input type='hidden' name='order_id_to_change' value='<?php echo htmlspecialchars($single_order['id']); ?>'><input type='hidden' name='new_status' value='Confirmed'><button type='submit' class='action-btn action-btn-confirm'>Confirm</button></form>
+                                    <form method='POST' action='confirm_order.php' style='display:inline;'><input type='hidden' name='order_id_to_change' value='<?php echo htmlspecialchars($single_order['id']); ?>'><input type='hidden' name='new_status' value='Confirmed'><button type='submit' class='action-btn'>Confirm</button></form>
                                     <form method='POST' action='confirm_order.php' style='display:inline;'><input type='hidden' name='order_id_to_change' value='<?php echo htmlspecialchars($single_order['id']); ?>'><input type='hidden' name='new_status' value='Cancelled'><button type='submit' class='action-btn action-btn-cancel'>Cancel</button></form>
                                 <?php elseif ($order_status_val === 'confirmed'): ?>
                                     <span class='action-btn-text confirmed'>Confirmed <small><?php if(isset($single_order['confirmed_at'])) echo htmlspecialchars(date('d M, H:i', strtotime($single_order['confirmed_at']))); ?></small></span>
@@ -675,16 +602,16 @@ if ($page === 'reviews' || $page === 'edit_review') {
                             </tbody></table>
                         <?php endif; ?>
                     </div>
-                </div>
+                </section>
 
                 <?php elseif ($page === 'products'): ?>
-                <div class="content-card">
+                <section class="content-card">
                     <h2 class="card-title">Manage Products</h2>
                     <?php if ($products_load_error): ?>
                         <div class="alert-message alert-danger"><?php echo htmlspecialchars($products_load_error); ?></div>
                     <?php else: ?>
                         <div style="margin-bottom: 1.5rem; text-align: right;">
-                            <a href="admin_dashboard.php?page=edit_product" class="action-btn" style="background-color: var(--primary-color); color: white !important; border-color: var(--primary-color);">
+                            <a href="admin_dashboard.php?page=edit_product" class="action-btn">
                                 <i class="fas fa-plus"></i> Add New Product
                             </a>
                         </div>
@@ -735,7 +662,7 @@ if ($page === 'reviews' || $page === 'edit_review') {
                             <?php endif; ?>
                         </div>
                     <?php endif; ?>
-                </div>
+                </section>
 
                 <?php elseif ($page === 'edit_product'):
                     $is_edit_mode = isset($_GET['id']);
@@ -765,7 +692,7 @@ if ($page === 'reviews' || $page === 'edit_review') {
                         ];
                     }
                 ?>
-                <div class="content-card">
+                <section class="content-card">
                     <h2 class="card-title"><?php echo $is_edit_mode ? 'Edit Product' : 'Add New Product'; ?></h2>
                     <?php if ($form_error): ?>
                         <div class="alert-message alert-danger"><?php echo $form_error; ?></div>
@@ -847,50 +774,12 @@ if ($page === 'reviews' || $page === 'edit_review') {
                         </div>
 
                         <div class="form-actions">
-                            <button type="submit" class="action-btn" style="background-color: var(--primary-color); color: white !important;">Save Product</button>
-                            <a href="admin_dashboard.php?page=products" class="action-btn">Cancel</a>
+                            <button type="submit" class="action-btn">Save Product</button>
+                            <a href="admin_dashboard.php?page=products" class="action-btn action-btn-cancel">Cancel</a>
                         </div>
                     </form>
                     <?php endif; ?>
-                </div>
-                <style>
-                    .product-form .form-group { margin-bottom: 1.5rem; }
-                    .product-form label { display: block; font-weight: 600; margin-bottom: 0.5rem; }
-                    .product-form input[type="text"],
-                    .product-form input[type="number"],
-                    .product-form textarea,
-                    .product-form select {
-                        width: 100%;
-                        padding: 0.8rem 1rem;
-                        border: 1px solid var(--border-color);
-                        border-radius: var(--border-radius);
-                        font-size: 1rem;
-                        transition: border-color 0.3s ease, box-shadow 0.3s ease;
-                    }
-                    .product-form input[type="text"]:focus,
-                    .product-form input[type="number"]:focus,
-                    .product-form textarea:focus,
-                    .product-form select:focus {
-                        outline: none;
-                        border-color: var(--primary-color);
-                        box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.2);
-                    }
-                    .product-form textarea { min-height: 120px; font-family: inherit; }
-                    .product-form .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
-                    .product-form .form-actions { margin-top: 2rem; text-align: right; }
-
-        .switch { position: relative; display: inline-block; width: 60px; height: 34px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; }
-        .slider:before { position: absolute; content: ""; height: 26px; width: 26px; left: 4px; bottom: 4px; background-color: white; transition: .4s; }
-        input:checked + .slider { background-color: var(--primary-color); }
-        input:focus + .slider { box-shadow: 0 0 1px var(--primary-color); }
-        input:checked + .slider:before { transform: translateX(26px); }
-        .slider.round { border-radius: 34px; }
-        .slider.round:before { border-radius: 50%; }
-
-        .duration-item { display: flex; gap: 1rem; margin-bottom: 1rem; }
-                </style>
+                </section>
 
                 <?php elseif ($page === 'categories'):
                     $category_to_edit = null;
@@ -903,7 +792,7 @@ if ($page === 'reviews' || $page === 'edit_review') {
                         }
                     }
                 ?>
-                <div class="content-card">
+                <section class="content-card">
                     <h2 class="card-title"><?php echo $category_to_edit ? 'Edit Category' : 'Add New Category'; ?></h2>
                     <form action="save_category.php" method="POST" class="product-form">
                         <?php if ($category_to_edit): ?>
@@ -927,12 +816,12 @@ if ($page === 'reviews' || $page === 'edit_review') {
                             <small>e.g., 'fas fa-book-open'</small>
                         </div>
                         <div class="form-actions">
-                            <button type="submit" class="action-btn" style="background-color: var(--primary-color); color: white !important;">Save Category</button>
+                            <button type="submit" class="action-btn">Save Category</button>
                         </div>
                     </form>
-                </div>
+                </section>
 
-                <div class="content-card">
+                <section class="content-card">
                     <h2 class="card-title">Existing Categories</h2>
                     <?php if ($categories_load_error): ?>
                         <div class="alert-message alert-danger"><?php echo htmlspecialchars($categories_load_error); ?></div>
@@ -970,7 +859,7 @@ if ($page === 'reviews' || $page === 'edit_review') {
                             </table>
                         </div>
                     <?php endif; ?>
-                </div>
+                </section>
 
                 <?php elseif ($page === 'coupons'):
                     $coupon_to_edit = null;
@@ -983,7 +872,7 @@ if ($page === 'reviews' || $page === 'edit_review') {
                         }
                     }
                 ?>
-                <div class="content-card">
+                <section class="content-card">
                     <h2 class="card-title"><?php echo $coupon_to_edit ? 'Edit Coupon' : 'Add New Coupon'; ?></h2>
                     <form action="save_coupon.php" method="POST" class="product-form">
                         <?php if ($coupon_to_edit): ?>
@@ -1010,12 +899,12 @@ if ($page === 'reviews' || $page === 'edit_review') {
                             </div>
                         </div>
                         <div class="form-actions">
-                            <button type="submit" class="action-btn" style="background-color: var(--primary-color); color: white !important;">Save Coupon</button>
+                            <button type="submit" class="action-btn">Save Coupon</button>
                         </div>
                     </form>
-                </div>
+                </section>
 
-                <div class="content-card">
+                <section class="content-card">
                     <h2 class="card-title">Existing Coupons</h2>
                     <?php if ($coupons_load_error): ?>
                         <div class="alert-message alert-danger"><?php echo htmlspecialchars($coupons_load_error); ?></div>
@@ -1055,13 +944,13 @@ if ($page === 'reviews' || $page === 'edit_review') {
                             </table>
                         </div>
                     <?php endif; ?>
-                </div>
+                </section>
                 <?php elseif ($page === 'reviews'):
                     $pending_reviews = array_filter($reviews, fn($review) => $review['status'] === 'pending');
                     $approved_reviews = array_filter($reviews, fn($review) => $review['status'] === 'approved');
                     $rejected_reviews = array_filter($reviews, fn($review) => $review['status'] === 'rejected');
                 ?>
-                <div class="content-card">
+                <section class="content-card">
                     <h2 class="card-title">Manage Reviews</h2>
                     <div class="tabs">
                         <a href="?page=reviews&tab=pending" class="tab-link <?php echo ($_GET['tab'] ?? 'pending') === 'pending' ? 'active' : ''; ?>">Pending (<?php echo count($pending_reviews); ?>)</a>
@@ -1132,7 +1021,7 @@ if ($page === 'reviews' || $page === 'edit_review') {
                             </table>
                         <?php endif; ?>
                     </div>
-                </div>
+                </section>
                 <style>
                     .tabs {
                         display: flex;
@@ -1157,13 +1046,13 @@ if ($page === 'reviews' || $page === 'edit_review') {
                     }
                 </style>
                 <?php else: ?>
-                <div class="content-card">
+                <section class="content-card">
                     <h2 class="card-title">Page Not Found</h2>
                     <p>The page you requested could not be found.</p>
-                </div>
+                </section>
                 <?php endif; ?>
 
-            </div>
+            </section>
         </main>
     </div>
     <script>
@@ -1233,25 +1122,20 @@ if ($page === 'reviews' || $page === 'edit_review') {
             button.parentElement.remove();
         }
 
-        /* --- START: UPDATED JAVASCRIPT FOR SIDEBAR TOGGLE --- */
         document.addEventListener('DOMContentLoaded', function() {
-            // Update stats on initial load
             updateStatsDisplay(document.getElementById('period_selector').value); 
             
             const sidebarToggle = document.getElementById('sidebarToggle');
             const adminSidebar = document.getElementById('adminSidebar');
             
             if (sidebarToggle && adminSidebar) {
-                // Event listener for the toggle button
                 sidebarToggle.addEventListener('click', (e) => { 
-                    e.stopPropagation(); // Prevents the click from bubbling up to the document
+                    e.stopPropagation();
                     adminSidebar.classList.toggle('open'); 
                 });
                 
-                // Event listener to close the sidebar when clicking outside of it
                  document.addEventListener('click', function(event) {
-                     if (adminSidebar.classList.contains('open')) {
-                         // Check if the click was outside the sidebar and not on the toggle button
+                     if (window.innerWidth <= 767.98 && adminSidebar.classList.contains('open')) {
                          if (!adminSidebar.contains(event.target) && !sidebarToggle.contains(event.target)) {
                              adminSidebar.classList.remove('open');
                          }
@@ -1259,7 +1143,6 @@ if ($page === 'reviews' || $page === 'edit_review') {
                  });
             }
         });
-        /* --- END: UPDATED JAVASCRIPT --- */
     </script>
 </body>
 </html>
