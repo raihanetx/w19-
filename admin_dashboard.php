@@ -215,25 +215,25 @@ if ($page === 'reviews' || $page === 'edit_review') {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary-color: #8F87F1; 
-            --primary-color-rgb: 143, 135, 241; /* For rgba focus */
-            --primary-color-darker: #756dcf;
-            --text-color: #343f52; /* Slightly softer black */
-            --text-muted: #778398;
-            --background-color: #f5f7fa; /* Lighter, cleaner background */
+            --primary-color: #6a5acd;
+            --primary-color-rgb: 106, 90, 205;
+            --primary-color-darker: #483d8b;
+            --text-color: #333;
+            --text-muted: #777;
+            --background-color: #f8f9fa;
             --card-bg-color: #ffffff;
-            --border-color: #e3e8ee;
-            --sidebar-bg: #ffffff; /* White sidebar */
-            --sidebar-text: #525f7f; /* Darker text for white sidebar */
-            --sidebar-icon-color: #8898aa;
-            --sidebar-hover-bg: #f5f7fa;
-            --sidebar-hover-text: var(--primary-color);
-            --sidebar-active-bg: rgba(var(--primary-color-rgb), 0.1); /* Light primary for active */
-            --sidebar-active-text: var(--primary-color);
-            --sidebar-active-icon-color: var(--primary-color);
-            --font-family-sans-serif: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
-            --box-shadow: 0 0 30px 0 rgba(82,63,105,0.05); /* Softer shadow */
-            --border-radius: 6px;
+            --border-color: #dee2e6;
+            --sidebar-bg: #343a40;
+            --sidebar-text: #f8f9fa;
+            --sidebar-icon-color: #f8f9fa;
+            --sidebar-hover-bg: #495057;
+            --sidebar-hover-text: #ffffff;
+            --sidebar-active-bg: var(--primary-color);
+            --sidebar-active-text: #ffffff;
+            --sidebar-active-icon-color: #ffffff;
+            --font-family-sans-serif: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+            --box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            --border-radius: 8px;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -251,22 +251,21 @@ if ($page === 'reviews' || $page === 'edit_review') {
         .admin-sidebar {
             background-color: var(--sidebar-bg);
             width: 250px;
-            padding: 1.75rem 1.25rem;
+            padding: 1.5rem;
             position: fixed;
             height: 100%;
             overflow-y: auto;
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.3s ease-in-out;
             z-index: 1001;
             box-shadow: var(--box-shadow);
-            transform: translateX(-100%); /* Hidden by default on all screens */
+            transform: translateX(-100%);
         }
         .admin-sidebar.open {
-            transform: translateX(0); /* Becomes visible when .open class is added */
+            transform: translateX(0);
         }
-        /* --- END: UPDATED SIDEBAR STYLES --- */
 
-        .admin-sidebar .logo-admin { text-align: center; margin-bottom: 2.5rem; }
-        .admin-sidebar .logo-admin img { max-height: 45px; }
+        .admin-sidebar .logo-admin { text-align: center; margin-bottom: 2rem; }
+        .admin-sidebar .logo-admin img { max-height: 50px; }
         
         .admin-sidebar .admin-nav ul { list-style: none; }
         .admin-sidebar .admin-nav li a {
@@ -274,12 +273,12 @@ if ($page === 'reviews' || $page === 'edit_review') {
             text-decoration: none;
             display: flex; 
             align-items: center;
-            padding: 0.8rem 1rem; 
+            padding: 1rem;
             border-radius: var(--border-radius); 
-            margin-bottom: 0.3rem;
-            transition: background-color 0.2s ease, color 0.2s ease, fill 0.2s ease;
+            margin-bottom: 0.5rem;
+            transition: background-color 0.3s ease, color 0.3s ease;
             font-weight: 500;
-            font-size: 0.9rem;
+            font-size: 1rem;
         }
         .admin-sidebar .admin-nav li a:hover {
             background-color: var(--sidebar-hover-bg);
@@ -316,7 +315,7 @@ if ($page === 'reviews' || $page === 'edit_review') {
         
         .admin-topbar {
             background-color: var(--card-bg-color);
-            padding: 0.85rem 2rem; 
+            padding: 1rem 2rem;
             border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
@@ -324,22 +323,21 @@ if ($page === 'reviews' || $page === 'edit_review') {
             position: sticky;
             top: 0;
             z-index: 1000;
+            box-shadow: var(--box-shadow);
         }
 
-        /* --- START: UPDATED SIDEBAR TOGGLE STYLES --- */
         .admin-topbar .sidebar-toggle { 
-            font-size: 1.4rem; 
+            font-size: 1.5rem;
             cursor: pointer; 
             color: var(--text-muted); 
             margin-right: 1.5rem; 
-            display: inline-block; /* Always visible */
-            transition: color 0.2s ease;
+            display: inline-block;
+            transition: color 0.3s ease;
         }
-        /* --- END: UPDATED SIDEBAR TOGGLE STYLES --- */
 
         .admin-topbar .sidebar-toggle:hover { color: var(--primary-color); }
         .admin-topbar h1 { 
-            font-size: 1.3rem; /* Smaller title */
+            font-size: 1.5rem;
             color: var(--text-color); 
             margin: 0; 
             font-weight: 600; 
@@ -368,15 +366,15 @@ if ($page === 'reviews' || $page === 'edit_review') {
             border-radius: var(--border-radius); 
             box-shadow: var(--box-shadow); 
             border: 1px solid var(--border-color);
-            padding: 1.75rem;
+            padding: 2rem;
             margin-bottom: 2rem;
         }
         .content-card h2.card-title {
-            font-size: 1.15rem; /* Smaller card title */
+            font-size: 1.25rem;
             color: var(--text-color);
             margin-top: 0;
-            margin-bottom: 1.25rem;
-            padding-bottom: 0.85rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
             border-bottom: 1px solid var(--border-color);
             font-weight: 600;
         }
@@ -392,18 +390,18 @@ if ($page === 'reviews' || $page === 'edit_review') {
         }
         .orders-table th, .orders-table td {
             border-bottom: 1px solid var(--border-color);
-            padding: 0.9rem 1rem; 
+            padding: 1rem 1.5rem;
             text-align: left;
             vertical-align: middle; 
         }
         .orders-table th {
-            background-color: #f8f9fa; /* Lighter gray for header */
-            font-weight: 500; /* Lighter header weight */
-            color: var(--text-muted); 
+            background-color: var(--background-color);
+            font-weight: 600;
+            color: var(--text-color);
             white-space: nowrap;
-            text-transform: none; /* No uppercase */
-            font-size: 0.85rem; 
-            letter-spacing: 0;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.05em;
         }
         .orders-table tr:last-child td { border-bottom: none; }
         .orders-table td { color: var(--text-color); }
@@ -417,43 +415,38 @@ if ($page === 'reviews' || $page === 'edit_review') {
         .order-items-list-admin li .item-price { color: var(--text-muted); }
         
         .status-badge {
-            padding: 4px 10px; 
-            border-radius: 1rem; /* Pill shape */
-            font-size: 0.75rem;
-            font-weight: 500;
-            display: inline-block;
-            text-align: center;
-            min-width: 75px;
-            text-transform: capitalize;
-            border: 1px solid transparent;
+            padding: 0.25em 0.6em;
+            border-radius: var(--border-radius);
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
         }
-        .status-pending { background-color: #fff0c2; color: #855d0b; border-color: #ffe58f; }
-        .status-confirmed { background-color: #d1f2eb; color: #0b5742; border-color: #a3e9dd;}
-        .status-cancelled { background-color: #fde2e4; color: #8c1c13; border-color: #f5c2c7;}
-        .status-unknown { background-color: #e9ecef; color: #495057; border-color: #ced4da;}
+        .status-pending { background-color: #ffc107; color: #333; }
+        .status-confirmed { background-color: #28a745; color: #fff; }
+        .status-cancelled { background-color: #dc3545; color: #fff; }
+        .status-unknown { background-color: #6c757d; color: #fff; }
         
-        .action-buttons-group { display: flex; flex-direction: row; gap: 0.5rem; align-items: center; flex-wrap: wrap;}
+        .action-buttons-group { display: flex; gap: 0.5rem; }
         .action-btn {
-            padding: 0.4rem 0.8rem; 
-            border: 1px solid var(--border-color);
+            padding: 0.5rem 1rem;
+            border: 1px solid transparent;
             border-radius: var(--border-radius); 
             cursor: pointer;
-            font-size: 0.8rem;
+            font-size: 0.9rem;
             text-decoration: none;
-            transition: all 0.2s ease;
-            background-color: var(--card-bg-color);
-            color: var(--text-muted) !important;
+            transition: all 0.3s ease;
+            background-color: var(--primary-color);
+            color: #fff !important;
             font-weight: 500;
-            line-height: 1.2;
         }
         .action-btn:hover {
-            border-color: var(--primary-color);
-            color: var(--primary-color) !important;
-            background-color: rgba(var(--primary-color-rgb), 0.05);
+            background-color: var(--primary-color-darker);
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
         }
-        .action-btn-confirm:hover { background-color: #d1e7dd; border-color: #198754; color: #0f5132 !important; }
-        .action-btn-cancel:hover { background-color: #f8d7da; border-color: #dc3545; color: #58151c !important; }
-        .action-btn-delete:hover { background-color: #e9ecef; border-color: #adb5bd; color: #495057 !important; }
+        .action-btn-cancel { background-color: #dc3545; }
+        .action-btn-cancel:hover { background-color: #c82333; }
+        .action-btn-delete { background-color: #6c757d; }
+        .action-btn-delete:hover { background-color: #5a6268; }
         
         .action-btn-text { color: var(--text-color); font-weight: 500; font-size: 0.9rem; }
         .action-btn-text.confirmed { color: #198754; }
@@ -861,20 +854,30 @@ if ($page === 'reviews' || $page === 'edit_review') {
                     <?php endif; ?>
                 </div>
                 <style>
-                    .product-form .form-group { margin-bottom: 1rem; }
-                    .product-form label { display: block; font-weight: 500; margin-bottom: 0.5rem; }
+                    .product-form .form-group { margin-bottom: 1.5rem; }
+                    .product-form label { display: block; font-weight: 600; margin-bottom: 0.5rem; }
                     .product-form input[type="text"],
                     .product-form input[type="number"],
-                    .product-form textarea {
+                    .product-form textarea,
+                    .product-form select {
                         width: 100%;
-                        padding: 0.75rem;
+                        padding: 0.8rem 1rem;
                         border: 1px solid var(--border-color);
                         border-radius: var(--border-radius);
-                        font-size: 0.9rem;
+                        font-size: 1rem;
+                        transition: border-color 0.3s ease, box-shadow 0.3s ease;
                     }
-                    .product-form textarea { min-height: 80px; font-family: inherit; }
-                    .product-form .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-                    .product-form .form-actions { margin-top: 1.5rem; text-align: right; }
+                    .product-form input[type="text"]:focus,
+                    .product-form input[type="number"]:focus,
+                    .product-form textarea:focus,
+                    .product-form select:focus {
+                        outline: none;
+                        border-color: var(--primary-color);
+                        box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.2);
+                    }
+                    .product-form textarea { min-height: 120px; font-family: inherit; }
+                    .product-form .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+                    .product-form .form-actions { margin-top: 2rem; text-align: right; }
 
         .switch { position: relative; display: inline-block; width: 60px; height: 34px; }
         .switch input { opacity: 0; width: 0; height: 0; }
