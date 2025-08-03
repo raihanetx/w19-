@@ -26,6 +26,25 @@ if (file_exists($products_file_path)) {
     }
 }
 
+// Handle stock status
+$stock_status = isset($_POST['stock_status']) ? 'In Stock' : 'Out of Stock';
+
+// Handle durations
+$durations = [];
+if (isset($_POST['duration_labels']) && isset($_POST['duration_prices'])) {
+    $labels = $_POST['duration_labels'];
+    $prices = $_POST['duration_prices'];
+    for ($i = 0; $i < count($labels); $i++) {
+        if (!empty($labels[$i]) && !empty($prices[$i])) {
+            $durations[] = [
+                'label' => trim($labels[$i]),
+                'price' => floatval($prices[$i])
+            ];
+        }
+    }
+}
+
+
 // Get data from form
 $product_data = [
     'id'                => $_POST['id'] ?? null,
@@ -35,23 +54,11 @@ $product_data = [
     'category'          => trim($_POST['category'] ?? 'uncategorized'),
     'price'             => floatval($_POST['price'] ?? 0),
     'image'             => trim($_POST['image'] ?? ''),
-    'stock'             => intval($_POST['stock'] ?? 0),
+    'stock'             => $stock_status,
     'isFeatured'        => isset($_POST['isFeatured']),
-    'durations'         => []
+    'durations'         => $durations
 ];
 
-// Handle durations JSON
-$durations_json = trim($_POST['durations'] ?? '[]');
-if (!empty($durations_json)) {
-    $decoded_durations = json_decode($durations_json, true);
-    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded_durations)) {
-        $product_data['durations'] = $decoded_durations;
-    } else {
-        // Redirect with error if JSON is invalid
-        header("Location: admin_dashboard.php?page=products&error=invalid_durations_json");
-        exit();
-    }
-}
 
 $is_edit_mode = !empty($product_data['id']);
 

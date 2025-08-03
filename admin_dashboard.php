@@ -789,11 +789,13 @@ if ($page === 'reviews' || $page === 'edit_review') {
 
                         <div class="form-group">
                             <label for="description">Short Description</label>
+                            <button type="button" class="action-btn" onclick="wrapText('description', '<b>', '</b>')">Bold</button>
                             <textarea id="description" name="description" rows="3"><?php echo htmlspecialchars($product_to_edit['description']); ?></textarea>
                         </div>
 
                         <div class="form-group">
                             <label for="longDescription">Long Description</label>
+                            <button type="button" class="action-btn" onclick="wrapText('longDescription', '<b>', '</b>')">Bold</button>
                             <textarea id="longDescription" name="longDescription" rows="6"><?php echo htmlspecialchars($product_to_edit['longDescription']); ?></textarea>
                         </div>
 
@@ -820,15 +822,28 @@ if ($page === 'reviews' || $page === 'edit_review') {
                                 <input type="text" id="image" name="image" value="<?php echo htmlspecialchars($product_to_edit['image']); ?>">
                             </div>
                             <div class="form-group">
-                                <label for="stock">Stock Quantity</label>
-                                <input type="number" id="stock" name="stock" value="<?php echo htmlspecialchars($product_to_edit['stock']); ?>">
+                                <label for="stock">Stock Status</label>
+                                <label class="switch">
+                                    <input type="checkbox" name="stock_status" value="in_stock" <?php echo ($product_to_edit['stock'] !== 'Out of Stock') ? 'checked' : ''; ?>>
+                                    <span class="slider round"></span>
+                                </label>
                             </div>
                         </div>
 
                         <div class="form-group">
-                            <label for="durations">Durations (JSON format)</label>
-                            <textarea id="durations" name="durations" rows="4" placeholder='[{"label": "1 Month", "price": 100}, {"label": "1 Year", "price": 1000}]'><?php echo htmlspecialchars(json_encode($product_to_edit['durations'], JSON_PRETTY_PRINT)); ?></textarea>
-                            <small>Enter as a valid JSON array of objects, or leave empty if not applicable.</small>
+                            <label>Durations</label>
+                            <div id="durations-container">
+                                <?php if (!empty($product_to_edit['durations'])): ?>
+                                    <?php foreach ($product_to_edit['durations'] as $duration): ?>
+                                        <div class="duration-item">
+                                            <input type="text" name="duration_labels[]" placeholder="Label (e.g., 1 Month)" value="<?php echo htmlspecialchars($duration['label']); ?>">
+                                            <input type="number" name="duration_prices[]" placeholder="Price" value="<?php echo htmlspecialchars($duration['price']); ?>">
+                                            <button type="button" class="action-btn action-btn-cancel" onclick="removeDuration(this)">Remove</button>
+                                        </div>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </div>
+                            <button type="button" class="action-btn" onclick="addDuration()">Add Duration</button>
                         </div>
 
                         <div class="form-group">
@@ -860,6 +875,18 @@ if ($page === 'reviews' || $page === 'edit_review') {
                     .product-form textarea { min-height: 80px; font-family: inherit; }
                     .product-form .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
                     .product-form .form-actions { margin-top: 1.5rem; text-align: right; }
+
+        .switch { position: relative; display: inline-block; width: 60px; height: 34px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; }
+        .slider:before { position: absolute; content: ""; height: 26px; width: 26px; left: 4px; bottom: 4px; background-color: white; transition: .4s; }
+        input:checked + .slider { background-color: var(--primary-color); }
+        input:focus + .slider { box-shadow: 0 0 1px var(--primary-color); }
+        input:checked + .slider:before { transform: translateX(26px); }
+        .slider.round { border-radius: 34px; }
+        .slider.round:before { border-radius: 50%; }
+
+        .duration-item { display: flex; gap: 1rem; margin-bottom: 1rem; }
                 </style>
 
                 <?php elseif ($page === 'categories'):
@@ -1175,6 +1202,32 @@ if ($page === 'reviews' || $page === 'edit_review') {
                 document.getElementById('stat_pending_orders_in_period').textContent = '0';
                 document.getElementById('stat_total_revenue').textContent = '৳0.00';
             }
+        }
+
+        function wrapText(elementId, openTag, closeTag) {
+            const textArea = document.getElementById(elementId);
+            const start = textArea.selectionStart;
+            const end = textArea.selectionEnd;
+            const text = textArea.value;
+            const selectedText = text.substring(start, end);
+            const newText = openTag + selectedText + closeTag;
+            textArea.value = text.slice(0, start) + newText + text.slice(end);
+        }
+
+        function addDuration() {
+            const container = document.getElementById('durations-container');
+            const newItem = document.createElement('div');
+            newItem.className = 'duration-item';
+            newItem.innerHTML = `
+                <input type="text" name="duration_labels[]" placeholder="Label (e.g., 1 Month)">
+                <input type="number" name="duration_prices[]" placeholder="Price">
+                <button type="button" class="action-btn action-btn-cancel" onclick="removeDuration(this)">Remove</button>
+            `;
+            container.appendChild(newItem);
+        }
+
+        function removeDuration(button) {
+            button.parentElement.remove();
         }
 
         /* --- START: UPDATED JAVASCRIPT FOR SIDEBAR TOGGLE --- */
