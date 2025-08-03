@@ -160,6 +160,28 @@ if (file_exists($categories_file_path)) {
 }
 // ---------------------------------------------------------
 
+// ---------- LOAD COUPONS ----------
+$coupons = [];
+$coupons_load_error = null;
+if ($page === 'coupons' || $page === 'edit_coupon') {
+    $coupons_file_path = __DIR__ . '/coupons.json';
+    if (file_exists($coupons_file_path)) {
+        $json_coupon_data = file_get_contents($coupons_file_path);
+        if ($json_coupon_data === false) {
+            $coupons_load_error = "Could not read coupons.json file.";
+        } else {
+            $decoded_coupons = json_decode($json_coupon_data, true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded_coupons)) {
+                $coupons = $decoded_coupons;
+            } else {
+                $coupons_load_error = "Critical Error: Could not decode coupons.json. Error: " . json_last_error_msg();
+            }
+        }
+    } else {
+        $coupons_load_error = "coupons.json file not found.";
+    }
+}
+// ---------------------------------------------------------
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -525,6 +547,7 @@ if (file_exists($categories_file_path)) {
                     <li><a href="admin_dashboard.php?page=dashboard" class="<?php echo ($page === 'dashboard') ? 'active' : ''; ?>"><i class="fas fa-chart-pie"></i> <span>Dashboard</span></a></li>
                     <li><a href="admin_dashboard.php?page=products" class="<?php echo ($page === 'products') ? 'active' : ''; ?>"><i class="fas fa-box"></i> <span>Manage Products</span></a></li>
                     <li><a href="admin_dashboard.php?page=categories" class="<?php echo ($page === 'categories') ? 'active' : ''; ?>"><i class="fas fa-tags"></i> <span>Manage Categories</span></a></li>
+                    <li><a href="admin_dashboard.php?page=coupons" class="<?php echo ($page === 'coupons') ? 'active' : ''; ?>"><i class="fas fa-gift"></i> <span>Manage Coupons</span></a></li>
                     <li><a href="admin_dashboard.php?logout=1"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a></li>
                 </ul>
             </nav>
@@ -895,6 +918,90 @@ if (file_exists($categories_file_path)) {
                     <?php endif; ?>
                 </div>
 
+                <?php elseif ($page === 'coupons'):
+                    $coupon_to_edit = null;
+                    if (isset($_GET['edit_id'])) {
+                        foreach ($coupons as $c) {
+                            if ($c['id'] == $_GET['edit_id']) {
+                                $coupon_to_edit = $c;
+                                break;
+                            }
+                        }
+                    }
+                ?>
+                <div class="content-card">
+                    <h2 class="card-title"><?php echo $coupon_to_edit ? 'Edit Coupon' : 'Add New Coupon'; ?></h2>
+                    <form action="save_coupon.php" method="POST" class="product-form">
+                        <?php if ($coupon_to_edit): ?>
+                            <input type="hidden" name="id" value="<?php echo htmlspecialchars($coupon_to_edit['id']); ?>">
+                        <?php endif; ?>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="code">Coupon Code</label>
+                                <input type="text" id="code" name="code" value="<?php echo htmlspecialchars($coupon_to_edit['code'] ?? ''); ?>" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="discount">Discount Value (%)</label>
+                                <input type="number" id="discount" name="discount" value="<?php echo htmlspecialchars($coupon_to_edit['discount'] ?? ''); ?>" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="usage_limit">Usage Limit</label>
+                                <input type="number" id="usage_limit" name="usage_limit" value="<?php echo htmlspecialchars($coupon_to_edit['usage_limit'] ?? ''); ?>" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="expiry_date">Expiry Date</label>
+                                <input type="date" id="expiry_date" name="expiry_date" value="<?php echo htmlspecialchars($coupon_to_edit['expiry_date'] ?? ''); ?>" required>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="action-btn" style="background-color: var(--primary-color); color: white !important;">Save Coupon</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="content-card">
+                    <h2 class="card-title">Existing Coupons</h2>
+                    <?php if ($coupons_load_error): ?>
+                        <div class="alert-message alert-danger"><?php echo htmlspecialchars($coupons_load_error); ?></div>
+                    <?php elseif (empty($coupons)): ?>
+                        <p class="no-orders-message">No coupons found.</p>
+                    <?php else: ?>
+                        <div class="orders-table-container">
+                            <table class="orders-table">
+                                <thead>
+                                    <tr>
+                                        <th>Code</th>
+                                        <th>Discount</th>
+                                        <th>Usage Limit</th>
+                                        <th>Expiry Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($coupons as $coupon): ?>
+                                    <tr>
+                                        <td><?php echo htmlspecialchars($coupon['code']); ?></td>
+                                        <td><?php echo htmlspecialchars($coupon['discount']); ?>%</td>
+                                        <td><?php echo htmlspecialchars($coupon['usage_limit']); ?></td>
+                                        <td><?php echo htmlspecialchars($coupon['expiry_date']); ?></td>
+                                        <td>
+                                            <div class="action-buttons-group">
+                                                <a href="admin_dashboard.php?page=coupons&edit_id=<?php echo htmlspecialchars($coupon['id']); ?>" class="action-btn">Edit</a>
+                                                <form action="delete_coupon.php" method="POST" onsubmit="return confirm('Are you sure you want to delete this coupon?');" style="display:inline;">
+                                                    <input type="hidden" name="coupon_id_to_delete" value="<?php echo htmlspecialchars($coupon['id']); ?>">
+                                                    <button type="submit" class="action-btn action-btn-cancel">Delete</button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    <?php endif; ?>
+                </div>
                 <?php else: ?>
                 <div class="content-card">
                     <h2 class="card-title">Page Not Found</h2>
