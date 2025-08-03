@@ -71,7 +71,7 @@ if ($is_edit_mode) {
 $new_json_data = json_encode($all_categories, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 
 if (file_put_contents($categories_file_path, $new_json_data)) {
-    header("Location: admin_dashboard.php?page=categories&status=save_success");
+    header("Location: admin_dashboard.php?page=categories&status=success");
 } else {
     header("Location: admin_dashboard.php?page=categories&error=file_save_failed");
 }

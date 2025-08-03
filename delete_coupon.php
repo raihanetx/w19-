@@ -48,6 +48,5 @@ if (file_put_contents($coupons_file_path, $json_data) === false) {
     exit();
 }
 
-header("Location: admin_dashboard.php?page=coupons&status=deleted");
+header("Location: admin_dashboard.php?page=coupons&status=success");
 exit();
-?>

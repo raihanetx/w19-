@@ -91,7 +91,7 @@ if ($is_edit_mode) {
 $new_json_data = json_encode($all_products, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 
 if (file_put_contents($products_file_path, $new_json_data)) {
-    header("Location: admin_dashboard.php?page=products&status=save_success");
+    header("Location: admin_dashboard.php?page=products&status=success");
 } else {
     header("Location: admin_dashboard.php?page=products&error=file_save_failed");
 }

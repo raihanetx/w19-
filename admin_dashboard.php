@@ -507,6 +507,13 @@ if ($page === 'reviews' || $page === 'edit_review') {
 
             <section class="admin-page-content">
 
+                <?php if (isset($_GET['status']) && $_GET['status'] === 'success'): ?>
+                    <div class="alert-message alert-success">
+                        Action completed successfully!
+                        <a href="index.html" target="_blank" class="action-btn" style="margin-left: 1rem;">View Live Site</a>
+                    </div>
+                <?php endif; ?>
+
                 <?php if ($page === 'dashboard'): ?>
                 <section class="content-card">
                     <h2 class="card-title">Performance Overview</h2>
@@ -775,7 +782,7 @@ if ($page === 'reviews' || $page === 'edit_review') {
 
                         <div class="form-actions">
                             <button type="submit" class="action-btn">Save Product</button>
-                            <a href="admin_dashboard.php?page=products" class="action-btn action-btn-cancel">Cancel</a>
+                            <a href="admin_dashboard.php?page=products" class="action-btn action-btn-cancel" onclick="history.back(); return false;">Back</a>
                         </div>
                     </form>
                     <?php endif; ?>
@@ -1142,6 +1149,24 @@ if ($page === 'reviews' || $page === 'edit_review') {
                      }
                  });
             }
+
+            const navLinks = document.querySelectorAll('.admin-nav a');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const page = this.getAttribute('href').split('?page=')[1];
+                    history.pushState({page: page}, '', `?page=${page}`);
+                    // This is a simple SPA, so we just reload the page with the new state.
+                    // A more advanced implementation would fetch and replace content with JS.
+                    location.reload();
+                });
+            });
+
+            window.addEventListener('popstate', function(e) {
+                if (e.state) {
+                    location.reload();
+                }
+            });
         });
     </script>
 </body>
