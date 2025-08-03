@@ -1,7 +1,7 @@
 <?php
 session_start();
-// error_reporting(E_ALL);
-// ini_set('display_errors', 1);
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
 $correct_admin_password = "YOUR_VERY_STRONG_AND_UNIQUE_PASSWORD_HERE"; // <<<<<<<<<<<<< এই পাসওয়ার্ডটা পরিবর্তন করুন!
 
