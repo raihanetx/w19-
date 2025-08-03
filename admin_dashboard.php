@@ -673,30 +673,29 @@ if ($page === 'reviews' || $page === 'edit_review') {
 
                 <?php elseif ($page === 'edit_product'):
                     $is_edit_mode = isset($_GET['id']);
-                    $product_to_edit = null;
+                    $product_to_edit = [
+                        'id' => '', 'name' => '', 'description' => '', 'longDescription' => '', 'category' => '',
+                        'price' => 0, 'image' => '', 'stock' => 0, 'isFeatured' => false, 'durations' => []
+                    ];
                     $form_error = null;
 
                     if ($is_edit_mode) {
                         $product_id = $_GET['id'];
                         $all_products_raw = file_get_contents(__DIR__ . '/products.json');
                         $all_products = json_decode($all_products_raw, true);
+                        $found_product = false;
                         if ($all_products) {
                             foreach ($all_products as $p) {
                                 if ($p['id'] == $product_id) {
-                                    $product_to_edit = $p;
+                                    $product_to_edit = array_merge($product_to_edit, $p);
+                                    $found_product = true;
                                     break;
                                 }
                             }
                         }
-                        if (!$product_to_edit) {
+                        if (!$found_product) {
                             $form_error = "Product with ID " . htmlspecialchars($product_id) . " not found.";
                         }
-                    } else {
-                        // Default values for a new product
-                        $product_to_edit = [
-                            'id' => '', 'name' => '', 'description' => '', 'longDescription' => '', 'category' => '',
-                            'price' => 0, 'image' => '', 'stock' => 0, 'isFeatured' => false, 'durations' => []
-                        ];
                     }
                 ?>
                 <section class="content-card">

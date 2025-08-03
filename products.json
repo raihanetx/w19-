@@ -1,1 +1,14 @@
-[]
+[
+    {
+        "id": 1,
+        "name": "Sample Product",
+        "description": "This is a sample product.",
+        "longDescription": "This is a longer description of the sample product.",
+        "price": 10.99,
+        "image": "path/to/image.jpg",
+        "category": "course",
+        "stock": 10,
+        "isFeatured": true,
+        "durations": []
+    }
+]
